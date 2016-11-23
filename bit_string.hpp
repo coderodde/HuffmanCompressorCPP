@@ -3,8 +3,9 @@
 #ifndef CODERODDE_BIT_STRING
 #define CODERODDE_BIT_STRING
 
-#include <vector>
 #include <cstdint>
+#include <iostream>
+#include <vector>
 
 class bit_string {
 public:
@@ -62,7 +63,17 @@ public:
     /***********************************************************************
     * Returns an array of bytes holding all the bits from this bit string. *
     ***********************************************************************/
-    std::vector<uint8_t>&& to_byte_array() const;
+    std::vector<uint8_t> to_byte_array() const;
+    
+    friend std::ostream& operator<<(std::ostream& out, bit_string& b)
+    {
+        for (size_t i = 0; i != b.length(); ++i)
+        {
+            out << b.read_bit(i) ? '1' : '0';
+        }
+        
+        return out;
+    }
     
 private:
     std::vector<uint64_t> storage_longs;

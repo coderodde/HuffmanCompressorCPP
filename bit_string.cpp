@@ -66,7 +66,7 @@ size_t bit_string::get_number_of_occupied_bytes() const
     return size / CHAR_BIT + ((size % CHAR_BIT == 0) ? 0 : 1);
 }
 
-std::vector<uint8_t>&& bit_string::to_byte_array() const
+std::vector<uint8_t> bit_string::to_byte_array() const
 {
     size_t number_of_bytes = get_number_of_occupied_bytes();
     std::vector<uint8_t> ret(number_of_bytes);

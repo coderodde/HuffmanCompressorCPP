@@ -18,6 +18,14 @@ bit_string::bit_string(const bit_string& to_copy)
     storage_capacity{to_copy.storage_capacity}
 {}
 
+bit_string& bit_string::operator=(bit_string &&other)
+{
+    storage_longs = std::move(other.storage_longs);
+    storage_capacity = other.storage_capacity;
+    size = other.size;
+    return *this;
+}
+
 void bit_string::append_bit(bool bit)
 {
     check_bit_array_capacity(size + 1);

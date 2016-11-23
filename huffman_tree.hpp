@@ -20,6 +20,12 @@ public:
     *****************************************/ 
     std::map<uint8_t, bit_string> infer_encoder_map();
     
+    /**********************************************************************
+    * Decodes the next character from the bit string starting at bit with *
+    * index 'start_index'.                                                *
+    **********************************************************************/
+    uint8_t decode_bit_string(size_t& start_index, bit_string& bits);
+    
 private:
     
     struct huffman_tree_node

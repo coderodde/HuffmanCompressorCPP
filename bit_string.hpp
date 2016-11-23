@@ -24,6 +24,16 @@ public:
     ***********************************/
     explicit bit_string(const bit_string& to_copy);
     
+    /********************************
+    * The move assignment operator. *
+    ********************************/
+    bit_string& operator=(bit_string&& other);
+    
+    /************************
+    * The move constructor. *
+    ************************/
+    bit_string(bit_string&& other);
+    
     /************************************
     * Appends 'bit' to this bit string. *
     ************************************/
@@ -69,7 +79,7 @@ public:
     {
         for (size_t i = 0; i != b.length(); ++i)
         {
-            out << b.read_bit(i) ? '1' : '0';
+            out << (b.read_bit(i) ? '1' : '0');
         }
         
         return out;

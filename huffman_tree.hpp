@@ -13,6 +13,11 @@ public:
     *******************************************************/
     explicit huffman_tree(std::map<int8_t, float>& weight_map);
     
+    /******************************************************
+    * Recover the Huffman tree from an input encoder map. *
+    ******************************************************/
+    explicit huffman_tree(std::map<int8_t, bit_string>& encoder_map);
+    
     ~huffman_tree();
     
     /*****************************************

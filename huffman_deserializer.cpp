@@ -5,6 +5,25 @@
 #include <sstream>
 #include <string>
 
+huffman_deserializer::result
+huffman_deserializer::deserialize(std::vector<int8_t> &data)
+{
+    check_signature(data);
+    size_t number_of_code_words = extract_number_of_code_words(data);
+    size_t number_of_text_bits  = extract_number_of_encoded_text_bits(data);
+    std::map<int8_t, bit_string> encoder_map =
+        extract_encoder_map(data,
+                            number_of_code_words);
+    
+    bit_string encoded_text = extract_encoded_text(data,
+                                                   encoder_map,
+                                                   number_of_text_bits);
+    result ret;
+    ret.encoder_map  = std::move(encoder_map);
+    ret.encoded_text = std::move(encoded_text);
+    return ret;
+}
+
 void huffman_deserializer
 ::check_signature(std::vector<int8_t>& data)
 {

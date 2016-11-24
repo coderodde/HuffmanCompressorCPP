@@ -1,10 +1,17 @@
 #include "bit_string.hpp"
 #include "byte_weights.hpp"
+#include "huffman_decoder.hpp"
+#include "huffman_deserializer.hpp"
+#include "huffman_encoder.hpp"
+#include "huffman_serializer.hpp"
 #include "huffman_tree.hpp"
 
 #include <iostream>
+#include <limits>
 #include <map>
+#include <random>
 #include <stdexcept>
+#include <cstdint>
 
 using std::cout;
 using std::cerr;
@@ -25,25 +32,25 @@ void test_all();
 
 int main(int argc, const char * argv[])
 {
-    std::vector<int8_t> text = {(int8_t) 'h', (int8_t) 'w', (int8_t) 0xb9 };
-    //{'h', 'e', 'l', 'l', 'o', ' ', 'w', 'o', 'r', 'l', 'd'};
-    
-    std::map<int8_t, float> weight_map = compute_char_weights(text);
-    
-    for (auto& p : weight_map)
-    {
-        cout << p.first << " " << p.second << endl;
-    }
-    
-    exit(0);
-    
-    huffman_tree tree(weight_map);
-    std::map<int8_t, bit_string> encoder_map = tree.infer_encoder_map();
-    
-    for (auto p : encoder_map)
-    {
-        cout << (char) p.first << ": " << p.second << endl;
-    }
+//    std::vector<int8_t> text = {(int8_t) 'h', (int8_t) 'w', (int8_t) 0xb9 };
+//    //{'h', 'e', 'l', 'l', 'o', ' ', 'w', 'o', 'r', 'l', 'd'};
+//    
+//    std::map<int8_t, float> weight_map = compute_char_weights(text);
+//    
+//    for (auto& p : weight_map)
+//    {
+//        cout << p.first << " " << p.second << endl;
+//    }
+//    
+//    exit(0);
+//    
+//    huffman_tree tree(weight_map);
+//    std::map<int8_t, bit_string> encoder_map = tree.infer_encoder_map();
+//    
+//    for (auto p : encoder_map)
+//    {
+//        cout << (char) p.first << ": " << p.second << endl;
+//    }
     
     test_all();
     return 0;
@@ -284,8 +291,61 @@ void test_bit_string()
     test_bit_string_to_byte_array();
 }
 
+std::vector<int8_t> random_text()
+{
+    std::random_device rd;
+    std::default_random_engine engine(rd());
+    std::uniform_int_distribution<size_t> uniform_dist_length(0, 10 * 100);
+    std::uniform_int_distribution<int8_t>
+        uniform_dist(std::numeric_limits<int8_t>::min(),
+                     std::numeric_limits<int8_t>::max());
+    
+    size_t len = uniform_dist_length(engine);
+    std::vector<int8_t> ret;
+    
+    for (size_t i = 0; i != len; ++i)
+    {
+        ret.push_back(uniform_dist(engine));
+    }
+    
+    return ret;
+}
+
+void test_brute_force()
+{
+    std::vector<int8_t> text = random_text();
+    std::map<int8_t, float> weight_map = compute_char_weights(text);
+    
+    huffman_tree tree(weight_map);
+    huffman_encoder encoder;
+    huffman_serializer serializer;
+    huffman_deserializer deserializer;
+    huffman_decoder decoder;
+    
+    std::map<int8_t, bit_string> encoder_map = tree.infer_encoder_map();
+    bit_string encoded_text = encoder.encode(encoder_map, text);
+    
+    std::vector<int8_t> encoded_data = serializer.serialize(encoder_map,
+                                                            encoded_text);
+    huffman_deserializer::result _result =
+        deserializer.deserialize(encoded_data);
+    huffman_tree decoder_tree(_result.encoder_map);
+    
+    std::vector<int8_t> recovered_text = decoder.decode(decoder_tree,
+                                                        _result.encoded_text);
+}
+
+void test_algorithms()
+{
+    for (int iter = 0; iter != 10; ++iter)
+    {
+        void test_brute_force();
+    }
+}
+
 void test_all()
 {
     test_bit_string();
+    test_algorithms();
     cout << "All tests passed." << endl;
 }

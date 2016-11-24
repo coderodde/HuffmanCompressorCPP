@@ -74,15 +74,15 @@ size_t bit_string::get_number_of_occupied_bytes() const
     return size / CHAR_BIT + ((size % CHAR_BIT == 0) ? 0 : 1);
 }
 
-std::vector<uint8_t> bit_string::to_byte_array() const
+std::vector<int8_t> bit_string::to_byte_array() const
 {
     size_t number_of_bytes = get_number_of_occupied_bytes();
-    std::vector<uint8_t> ret(number_of_bytes);
+    std::vector<int8_t> ret(number_of_bytes);
     
     for (size_t i = 0; i != number_of_bytes; ++i)
     {
-        ret[i] = (uint8_t)((storage_longs[i / sizeof(uint64_t)]
-                            >> CHAR_BIT * (i % sizeof(uint64_t))));
+        ret[i] = (int8_t)((storage_longs[i / sizeof(uint64_t)]
+                           >> CHAR_BIT * (i % sizeof(uint64_t))));
     }
     
     return std::move(ret);

@@ -73,7 +73,7 @@ public:
     /***********************************************************************
     * Returns an array of bytes holding all the bits from this bit string. *
     ***********************************************************************/
-    std::vector<uint8_t> to_byte_array() const;
+    std::vector<int8_t> to_byte_array() const;
     
     friend std::ostream& operator<<(std::ostream& out, bit_string& b)
     {

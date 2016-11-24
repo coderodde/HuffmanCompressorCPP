@@ -257,7 +257,7 @@ void test_bit_string_to_byte_array()
         b.append_bit(i % 2 == 0);
     }
     
-    std::vector<uint8_t> bytes{b.to_byte_array()};
+    std::vector<int8_t> bytes{b.to_byte_array()};
     
     for (int i = 0; i < 5; ++i)
     {

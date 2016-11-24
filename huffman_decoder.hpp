@@ -7,7 +7,7 @@
 
 class huffman_decoder {
 public:
-    std::vector<uint8_t> decode(huffman_tree& tree, bit_string encoded_text);
+    std::vector<int8_t> decode(huffman_tree& tree, bit_string& encoded_text);
 };
 
 #endif // HUFFMAN_DECODER_HPP

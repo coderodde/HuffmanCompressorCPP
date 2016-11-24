@@ -13,7 +13,7 @@ using std::runtime_error;
 
 #define ASSERT(C) if (!(C)) report(__FILE__, __LINE__)
 
-void report(char* file, size_t line)
+void report(const char* file, size_t line)
 {
     cerr << "File: " << file << ", line: " << line << endl;
     exit(1);
@@ -25,10 +25,10 @@ void test_all();
 
 int main(int argc, const char * argv[])
 {
-    std::vector<uint8_t> text =
-    {'h', 'e', 'l', 'l', 'o', ' ', 'w', 'o', 'r', 'l', 'd'};
+    std::vector<int8_t> text = {(int8_t) 'h', (int8_t) 'w', (int8_t) 0xb9 };
+    //{'h', 'e', 'l', 'l', 'o', ' ', 'w', 'o', 'r', 'l', 'd'};
     
-    std::map<uint8_t, float> weight_map = compute_char_weights(text);
+    std::map<int8_t, float> weight_map = compute_char_weights(text);
     
     for (auto& p : weight_map)
     {
@@ -38,7 +38,7 @@ int main(int argc, const char * argv[])
     exit(0);
     
     huffman_tree tree(weight_map);
-    std::map<uint8_t, bit_string> encoder_map = tree.infer_encoder_map();
+    std::map<int8_t, bit_string> encoder_map = tree.infer_encoder_map();
     
     for (auto p : encoder_map)
     {

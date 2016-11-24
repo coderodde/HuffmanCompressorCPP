@@ -7,8 +7,8 @@
 
 class huffman_encoder {
 public:
-    bit_string encode(std::map<uint8_t, bit_string> encoder_map,
-                      std::vector<uint8_t> text);
+    bit_string encode(std::map<int8_t, bit_string>& encoder_map,
+                      std::vector<int8_t>& text);
 };
 
 #endif // HUFFMAN_ENCODER_HPP

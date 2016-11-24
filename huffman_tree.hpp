@@ -11,32 +11,32 @@ public:
     /*******************************************************
     * Build this Huffman tree using the character weights. *
     *******************************************************/
-    explicit huffman_tree(std::map<uint8_t, float>& weight_map);
+    explicit huffman_tree(std::map<int8_t, float>& weight_map);
     
     ~huffman_tree();
     
     /*****************************************
     * Infers the encoder map from this tree. *
     *****************************************/ 
-    std::map<uint8_t, bit_string> infer_encoder_map();
+    std::map<int8_t, bit_string> infer_encoder_map();
     
     /**********************************************************************
     * Decodes the next character from the bit string starting at bit with *
     * index 'start_index'.                                                *
     **********************************************************************/
-    uint8_t decode_bit_string(size_t& start_index, bit_string& bits);
+    int8_t decode_bit_string(size_t& start_index, bit_string& bits);
     
 private:
     
     struct huffman_tree_node
     {
-        uint8_t            character;
+        int8_t             character;
         float              weight;
         bool               is_leaf;
         huffman_tree_node* left;
         huffman_tree_node* right;
         
-        huffman_tree_node(uint8_t character,
+        huffman_tree_node(int8_t character,
                           float weight,
                           bool is_leaf)
         :
@@ -61,7 +61,7 @@ private:
     
     void infer_encoder_map_impl(bit_string& bit_string_builder,
                                 huffman_tree_node* current_node,
-                                std::map<uint8_t, bit_string>& map);
+                                std::map<int8_t, bit_string>& map);
     
     float check_weight(float weight);
     
@@ -77,7 +77,6 @@ public:
             return lhs->weight > rhs->weight;
         }
     };
-    
 };
 
 

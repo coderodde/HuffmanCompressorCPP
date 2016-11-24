@@ -7,7 +7,7 @@
 #include <utility>
 #include <vector>
 
-huffman_tree::huffman_tree(std::map<uint8_t, float>& weight_map)
+huffman_tree::huffman_tree(std::map<int8_t, float>& weight_map)
 {
     if (weight_map.empty())
     {
@@ -22,7 +22,7 @@ huffman_tree::huffman_tree(std::map<uint8_t, float>& weight_map)
     
     std::for_each(weight_map.cbegin(),
                   weight_map.cend(),
-                  [&queue](std::pair<uint8_t, float> p) {
+                  [&queue](std::pair<int8_t, float> p) {
                       queue.push(new huffman_tree_node(p.first,
                                                        p.second,
                                                        true));
@@ -43,9 +43,9 @@ huffman_tree::~huffman_tree()
     delete root;
 }
 
-std::map<uint8_t, bit_string> huffman_tree::infer_encoder_map()
+std::map<int8_t, bit_string> huffman_tree::infer_encoder_map()
 {
-    std::map<uint8_t, bit_string> map;
+    std::map<int8_t, bit_string> map;
     
     if (root->is_leaf)
     {
@@ -60,7 +60,7 @@ std::map<uint8_t, bit_string> huffman_tree::infer_encoder_map()
     return map;
 }
 
-uint8_t huffman_tree::decode_bit_string(size_t& index, bit_string& bits)
+int8_t huffman_tree::decode_bit_string(size_t& index, bit_string& bits)
 {
     huffman_tree_node* current_node = root;
     
@@ -76,7 +76,7 @@ uint8_t huffman_tree::decode_bit_string(size_t& index, bit_string& bits)
 void huffman_tree::infer_encoder_map_impl(
                             bit_string& current_code_word,
                             huffman_tree::huffman_tree_node* node,
-                            std::map<uint8_t, bit_string>& map)
+                            std::map<int8_t, bit_string>& map)
 {
     if (node->is_leaf)
     {

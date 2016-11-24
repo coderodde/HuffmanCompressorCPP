@@ -6,9 +6,9 @@
 using std::map;
 using std::vector;
 
-std::map<uint8_t, float> compute_char_weights(std::vector<uint8_t>& text)
+std::map<int8_t, float> compute_char_weights(std::vector<int8_t>& text)
 {
-    std::map<uint8_t, float> map;
+    std::map<int8_t, float> map;
     
     for (auto byte : text)
     {

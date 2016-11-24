@@ -77,7 +77,56 @@ size_t huffman_deserializer
 std::map<int8_t, bit_string> huffman_deserializer::
 extract_encoder_map(std::vector<int8_t>& data, size_t number_of_code_words)
 {
+    std::map<int8_t, bit_string> encoder_map;
     
+    try
+    {
+        size_t data_byte_index =
+            sizeof(huffman_serializer::MAGIC) +
+            huffman_serializer::BYTES_PER_BIT_COUNT_ENTRY +
+            huffman_serializer::BYTES_PER_CODE_WORD_COUNT_ENTRY;
+        
+        for (size_t i = 0; i != number_of_code_words; ++i)
+        {
+            int8_t character = data[data_byte_index++];
+            size_t code_word_length = data[data_byte_index++];
+            size_t bit_index = 0;
+            bit_string code_word_bits;
+            
+            for (size_t code_word_bit_index = 0;
+                 code_word_bit_index != code_word_length;
+                 code_word_bit_index++)
+            {
+                int8_t current_byte = data[data_byte_index];
+                bool bit = (current_byte & (1 << bit_index)) != 0;
+                code_word_bits.append_bit(bit);
+                
+                if (++bit_index == CHAR_BIT)
+                {
+                    bit_index = 0;
+                    data_byte_index++;
+                }
+            }
+            
+            encoder_map[character] = std::move(code_word_bits);
+            
+            if (bit_index != 0)
+            {
+                data_byte_index++;
+            }
+        }
+    }
+    catch (std::out_of_range& error)
+    {
+        std::stringstream ss;
+        ss << "The input data is too short in order to recover the encoding "
+              "map. "
+        << error.what();
+        std::string err_msg = ss.str();
+        throw file_format_error{err_msg.c_str()};
+    }
+    
+    return encoder_map;
 }
 
 bit_string huffman_deserializer
@@ -85,5 +134,46 @@ bit_string huffman_deserializer
                        std::map<int8_t, bit_string>& encoder_map,
                        size_t number_of_encoded_text_bits)
 {
+    size_t omitted_bytes =
+        sizeof(huffman_serializer::MAGIC) +
+        huffman_serializer::BYTES_PER_BIT_COUNT_ENTRY +
+        huffman_serializer::BYTES_PER_CODE_WORD_COUNT_ENTRY;
     
+    for (const auto& p : encoder_map)
+    {
+        omitted_bytes += 2 + p.second.get_number_of_occupied_bytes();
+    }
+    
+    bit_string encoded_text;
+    size_t current_byte_index = omitted_bytes;
+    size_t current_bit_index = 0;
+    
+    try
+    {
+        for (size_t bit_index = 0;
+             bit_index != number_of_encoded_text_bits;
+             bit_index++)
+        {
+            bool bit =
+                (data[current_byte_index] & (1 << current_bit_index)) != 0;
+            
+            encoded_text.append_bit(bit);
+            
+            if (++current_bit_index == CHAR_BIT)
+            {
+                current_bit_index = 0;
+                current_byte_index++;
+            }
+        }
+    }
+    catch (std::out_of_range& error)
+    {
+        std::stringstream ss;
+        ss << "The input data is too short in order to recover encoded text. "
+           << error.what();
+        std::string err_msg = ss.str();
+        throw file_format_error{err_msg.c_str()};
+    }
+    
+    return encoded_text;
 }

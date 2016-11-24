@@ -7,6 +7,11 @@
 
 class huffman_encoder {
 public:
+    
+    /***************************************************************************
+    * Encodes the input "text" using the encoder map 'encoder_map' and returns *
+    * the result bit string.                                                   *
+    ***************************************************************************/
     bit_string encode(std::map<int8_t, bit_string>& encoder_map,
                       std::vector<int8_t>& text);
 };

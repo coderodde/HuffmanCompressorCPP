@@ -38,9 +38,22 @@ huffman_tree::huffman_tree(std::map<int8_t, float>& weight_map)
     root = queue.top(); queue.pop();
 }
 
+void huffman_tree::recursive_node_delete(huffman_tree::huffman_tree_node* node)
+{
+    if (node == nullptr)
+    {
+        return;
+    }
+    
+    recursive_node_delete(node->left);
+    recursive_node_delete(node->right);
+    
+    delete node;
+}
+
 huffman_tree::~huffman_tree()
 {
-    delete root;
+    recursive_node_delete(root);
 }
 
 std::map<int8_t, bit_string> huffman_tree::infer_encoder_map()

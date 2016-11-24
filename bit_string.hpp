@@ -75,6 +75,12 @@ public:
     ***********************************************************************/
     std::vector<int8_t> to_byte_array() const;
     
+    /***************************************************************************
+    * Used for printing the bits in the output stream. Note that for each long *
+    * its bits are printed starting from the lowest bit, which implies that    *
+    * the actual longs are printed correctly, yet the bits within each long    *
+    * are printed "backwards."                                                 *
+    ***************************************************************************/
     friend std::ostream& operator<<(std::ostream& out, bit_string& b)
     {
         for (size_t i = 0; i != b.length(); ++i)
@@ -86,8 +92,14 @@ public:
     }
     
 private:
+    // The actual vector of longs storing the bits.
     std::vector<uint64_t> storage_longs;
+    
+    // The maximum number of bits this bit string can hold without enlarging the
+    // 'storage_longs'.
     size_t storage_capacity;
+    
+    // The actual number of bits this string is composed of.
     size_t size;
     
     // Makes sure that the index is within the range.

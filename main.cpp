@@ -296,13 +296,13 @@ void test_bit_string()
 std::vector<int8_t> random_text()
 {
     std::random_device rd;
-    std::default_random_engine engine(rd());
+    std::default_random_engine engine(2600);
     std::uniform_int_distribution<size_t> uniform_dist_length(0, 10 * 100);
     std::uniform_int_distribution<int8_t>
         uniform_dist(std::numeric_limits<int8_t>::min(),
                      std::numeric_limits<int8_t>::max());
     
-    size_t len = uniform_dist_length(engine);
+    size_t len = 150; uniform_dist_length(engine);
     std::vector<int8_t> ret;
     
     for (size_t i = 0; i != len; ++i)
@@ -310,6 +310,7 @@ std::vector<int8_t> random_text()
         ret.push_back(uniform_dist(engine));
     }
     
+    cout << ret[1] << endl;
     return ret;
 }
 
@@ -320,31 +321,38 @@ void test_brute_force()
     std::map<int8_t, float> weight_map = compute_char_weights(text);
     
     huffman_tree tree(weight_map);
-    huffman_encoder encoder;
-    huffman_serializer serializer;
-    huffman_deserializer deserializer;
-    huffman_decoder decoder;
     
     std::map<int8_t, bit_string> encoder_map = tree.infer_encoder_map();
-    cout << "encoder_map.size() = " << encoder_map.size() << endl;
-    bit_string encoded_text = encoder.encode(encoder_map, text);
-    cout << "encoded_text.length() = " << encoded_text.length() << endl;
+    
+    huffman_encoder encoder;
+    
+    bit_string text_bit_string = encoder.encode(encoder_map, text);
+    
+    huffman_serializer serializer;
     
     std::vector<int8_t> encoded_data = serializer.serialize(weight_map,
-                                                            encoded_text);
-    cout << "encoded_data.size() = " << encoded_data.size() << endl;
-    huffman_deserializer::result _result =
-        deserializer.deserialize(encoded_data);
-    cout << "_result.encoded_text.length() = " << _result.encoded_text.length() << endl;
-    cout << "_result.weight_map.size() = " << _result.weight_map.size() << endl;
-    huffman_tree decoder_tree(_result.weight_map);
+                                                            text_bit_string);
+    huffman_deserializer deserializer;
+    huffman_deserializer::result hdr = deserializer.deserialize(encoded_data);
+    
+    huffman_tree decoder_tree(hdr.weight_map);
+    huffman_decoder decoder;
+    
+    ASSERT(hdr.weight_map.size() == weight_map.size());
+    
+    for (auto& e : hdr.weight_map)
+    {
+        auto iter = weight_map.find(e.first);
+        ASSERT(iter != weight_map.end());
+        ASSERT(e.second == iter->second);
+    }
+    
+    //ASSERT(text_bit_string.length() == hdr.encoded_text.length());
     
     std::vector<int8_t> recovered_text = decoder.decode(decoder_tree,
-                                                        _result.encoded_text);
+                                                        hdr.encoded_text);
     ASSERT(text.size() == recovered_text.size());
-    ASSERT(equal(text.cbegin(),
-                 text.cend(),
-                 recovered_text.cbegin()));
+    ASSERT(std::equal(text.begin(), text.end(), recovered_text.begin()));
 }
 
 void test_simple_algorithm()
@@ -389,7 +397,7 @@ void test_algorithms()
 {
     test_simple_algorithm();
     
-    for (int iter = 0; iter != 10; ++iter)
+    for (int iter = 0; iter != 1; ++iter)
     {
         test_brute_force();
     }

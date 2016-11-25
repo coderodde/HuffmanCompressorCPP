@@ -8,7 +8,7 @@ huffman_decoder::decode(huffman_tree& tree,
     size_t bit_string_length = encoded_text.length();
     std::vector<int8_t> decoded_text;
     
-    while (index != bit_string_length)
+    while (index < bit_string_length)
     {
         int8_t character = tree.decode_bit_string(index, encoded_text);
         decoded_text.push_back(character);

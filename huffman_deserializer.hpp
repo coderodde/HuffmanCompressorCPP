@@ -14,6 +14,10 @@ public:
         std::map<int8_t, float> weight_map;
     };
     
+    /********************************************************************
+    * Returns a struct holding the encoded text and the weight map that *
+    * produced it.                                                      *
+    ********************************************************************/
     result deserialize(std::vector<int8_t>& data);
     
 private:

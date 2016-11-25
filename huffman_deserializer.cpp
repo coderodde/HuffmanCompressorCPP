@@ -62,10 +62,10 @@ size_t huffman_deserializer
     
     size_t number_of_code_words = 0;
     
-    number_of_code_words |= (data[7] << 24);
-    number_of_code_words |= (data[6] << 16);
-    number_of_code_words |= (data[5] << 8);
-    number_of_code_words |= (data[4]);
+    number_of_code_words |= (uint8_t)(data[7] << 24);
+    number_of_code_words |= (uint8_t)(data[6] << 16);
+    number_of_code_words |= (uint8_t)(data[5] << 8);
+    number_of_code_words |= (uint8_t)(data[4]);
     
     return number_of_code_words;
 }
@@ -84,10 +84,10 @@ size_t huffman_deserializer
     
     size_t number_of_encoded_text_bits = 0;
     
-    number_of_encoded_text_bits |= (data[11] << 24);
-    number_of_encoded_text_bits |= (data[10] << 16);
-    number_of_encoded_text_bits |= (data[9]  << 8);
-    number_of_encoded_text_bits |=  data[8];
+    number_of_encoded_text_bits |= (uint8_t)(data[11] << 24);
+    number_of_encoded_text_bits |= (uint8_t)(data[10] << 16);
+    number_of_encoded_text_bits |= (uint8_t)(data[9]  << 8);
+    number_of_encoded_text_bits |= (uint8_t)(data[8]);
     
     return number_of_encoded_text_bits;
 }
@@ -156,7 +156,7 @@ bit_string huffman_deserializer
              bit_index++)
         {
             bool bit =
-                (data[current_byte_index] & (1 << current_bit_index)) != 0;
+                (data.at(current_byte_index) & (1 << current_bit_index)) != 0;
             
             encoded_text.append_bit(bit);
             

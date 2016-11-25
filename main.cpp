@@ -315,6 +315,7 @@ std::vector<int8_t> random_text()
 
 void test_brute_force()
 {
+    cout << "test_brute_force()" << endl;
     std::vector<int8_t> text = random_text();
     std::map<int8_t, float> weight_map = compute_char_weights(text);
     
@@ -325,26 +326,72 @@ void test_brute_force()
     huffman_decoder decoder;
     
     std::map<int8_t, bit_string> encoder_map = tree.infer_encoder_map();
+    cout << "encoder_map.size() = " << encoder_map.size() << endl;
     bit_string encoded_text = encoder.encode(encoder_map, text);
+    cout << "encoded_text.length() = " << encoded_text.length() << endl;
     
     std::vector<int8_t> encoded_data = serializer.serialize(weight_map,
                                                             encoded_text);
+    cout << "encoded_data.size() = " << encoded_data.size() << endl;
     huffman_deserializer::result _result =
         deserializer.deserialize(encoded_data);
+    cout << "_result.encoded_text.length() = " << _result.encoded_text.length() << endl;
+    cout << "_result.weight_map.size() = " << _result.weight_map.size() << endl;
     huffman_tree decoder_tree(_result.weight_map);
     
     std::vector<int8_t> recovered_text = decoder.decode(decoder_tree,
                                                         _result.encoded_text);
+    ASSERT(text.size() == recovered_text.size());
     ASSERT(equal(text.cbegin(),
                  text.cend(),
                  recovered_text.cbegin()));
 }
 
+void test_simple_algorithm()
+{
+    std::string text = "hello world";
+    std::vector<int8_t> text_vector;
+    
+    for (char c : text)
+    {
+        text_vector.push_back((int8_t) c);
+    }
+    
+    std::map<int8_t, float> weight_map = compute_char_weights(text_vector);
+    
+    huffman_tree tree(weight_map);
+    
+    std::map<int8_t, bit_string> encoder_map = tree.infer_encoder_map();
+    
+    huffman_encoder encoder;
+    
+    bit_string text_bit_string = encoder.encode(encoder_map, text_vector);
+    
+    huffman_serializer serializer;
+    
+    std::vector<int8_t> encoded_text = serializer.serialize(weight_map,
+                                                            text_bit_string);
+    
+    huffman_deserializer deserializer;
+    
+    huffman_deserializer::result hdr = deserializer.deserialize(encoded_text);
+    
+    huffman_tree decoder_tree(hdr.weight_map);
+    huffman_decoder decoder;
+    
+    std::vector<int8_t> recovered_text = decoder.decode(decoder_tree,
+                                                        hdr.encoded_text);
+    ASSERT(text.size() == recovered_text.size());
+    ASSERT(std::equal(text.begin(), text.end(), recovered_text.begin()));
+}
+
 void test_algorithms()
 {
+    test_simple_algorithm();
+    
     for (int iter = 0; iter != 10; ++iter)
     {
-        void test_brute_force();
+        test_brute_force();
     }
 }
 

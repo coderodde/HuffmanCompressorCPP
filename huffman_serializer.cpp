@@ -21,7 +21,7 @@ static size_t compute_byte_list_size(std::map<int8_t, float>& weight_map,
                   + encoded_text.get_number_of_occupied_bytes();
 }
 
-std::vector<int8_t>&&
+std::vector<int8_t>
 huffman_serializer::serialize(std::map<int8_t, float>& weight_map,
                               bit_string& encoded_text)
 {
@@ -69,5 +69,5 @@ huffman_serializer::serialize(std::map<int8_t, float>& weight_map,
               encoded_text_byte_vector.end(),
               std::back_inserter(byte_list));
     
-    return std::move(byte_list);
+    return byte_list;
 }

@@ -60,14 +60,19 @@ size_t huffman_deserializer
         throw file_format_error{err_msg.c_str()};
     }
     
-    size_t number_of_code_words = 0;
+    union
+    {
+        size_t num;
+        int8_t bytes[sizeof(size_t)];
+    } t;
     
-    number_of_code_words |= (uint8_t)(data[7] << 24);
-    number_of_code_words |= (uint8_t)(data[6] << 16);
-    number_of_code_words |= (uint8_t)(data[5] << 8);
-    number_of_code_words |= (uint8_t)(data[4]);
+    t.num = 0;
+    t.bytes[0] = data[4];
+    t.bytes[1] = data[5];
+    t.bytes[2] = data[6];
+    t.bytes[3] = data[7];
     
-    return number_of_code_words;
+    return t.num;
 }
 
 size_t huffman_deserializer
@@ -82,14 +87,19 @@ size_t huffman_deserializer
         throw file_format_error{err_msg.c_str()};
     }
     
-    size_t number_of_encoded_text_bits = 0;
+    union
+    {
+        size_t num;
+        int8_t bytes[8];
+    } t;
     
-    number_of_encoded_text_bits |= (uint8_t)(data[11] << 24);
-    number_of_encoded_text_bits |= (uint8_t)(data[10] << 16);
-    number_of_encoded_text_bits |= (uint8_t)(data[9]  << 8);
-    number_of_encoded_text_bits |= (uint8_t)(data[8]);
+    t.num = 0;
+    t.bytes[0] = data[8];
+    t.bytes[1] = data[9];
+    t.bytes[2] = data[10];
+    t.bytes[3] = data[11];
     
-    return number_of_encoded_text_bits;
+    return t.num;
 }
 
 std::map<int8_t, float> huffman_deserializer::

@@ -9,16 +9,20 @@
 
 class huffman_serializer {
 public:
-    static const int8_t MAGIC[4];/* = { (int8_t) 0xC0,
-                                        (int8_t) 0xDE,
-                                        (int8_t) 0x0D,
-                                        (int8_t) 0xDE };
-    */
-    static const size_t BYTES_PER_ENCODER_MAP_ENTRY;//     = 4;
-    static const size_t BYTES_PER_CODE_WORD_COUNT_ENTRY;// = 4;
-    static const size_t BYTES_PER_BIT_COUNT_ENTRY;//      = 4;
     
-    std::vector<int8_t>&& serialize(std::map<int8_t, bit_string>& encoder_map,
+    static union weight_converter
+    {
+        float weight;
+        int8_t bytes[4];
+    }
+    weight_to_bytes;
+    
+    static const int8_t MAGIC[4];
+    static const size_t BYTES_PER_WEIGHT_MAP_ENTRY;
+    static const size_t BYTES_PER_CODE_WORD_COUNT_ENTRY;
+    static const size_t BYTES_PER_BIT_COUNT_ENTRY;
+    
+    std::vector<int8_t>&& serialize(std::map<int8_t, float>& weight_map,
                                     bit_string& encoded_text);
 };
 

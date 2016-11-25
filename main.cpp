@@ -6,6 +6,7 @@
 #include "huffman_serializer.hpp"
 #include "huffman_tree.hpp"
 
+#include <algorithm>
 #include <iostream>
 #include <limits>
 #include <map>
@@ -16,6 +17,7 @@
 using std::cout;
 using std::cerr;
 using std::endl;
+using std::equal;
 using std::runtime_error;
 
 #define ASSERT(C) if (!(C)) report(__FILE__, __LINE__)
@@ -268,7 +270,7 @@ void test_bit_string_to_byte_array()
     
     for (int i = 0; i < 5; ++i)
     {
-        ASSERT(0xaa == bytes[i]);
+        ASSERT(0xaa == (uint8_t) bytes[i]);
     }
     
     for (int i = 5; i < 15; ++i)
@@ -325,14 +327,17 @@ void test_brute_force()
     std::map<int8_t, bit_string> encoder_map = tree.infer_encoder_map();
     bit_string encoded_text = encoder.encode(encoder_map, text);
     
-    std::vector<int8_t> encoded_data = serializer.serialize(encoder_map,
+    std::vector<int8_t> encoded_data = serializer.serialize(weight_map,
                                                             encoded_text);
     huffman_deserializer::result _result =
         deserializer.deserialize(encoded_data);
-    huffman_tree decoder_tree(_result.encoder_map);
+    huffman_tree decoder_tree(_result.weight_map);
     
     std::vector<int8_t> recovered_text = decoder.decode(decoder_tree,
                                                         _result.encoded_text);
+    ASSERT(equal(text.cbegin(),
+                 text.cend(),
+                 recovered_text.cbegin()));
 }
 
 void test_algorithms()

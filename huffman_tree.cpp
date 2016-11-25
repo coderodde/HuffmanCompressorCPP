@@ -1,3 +1,4 @@
+#include "bit_string.hpp"
 #include "huffman_tree.hpp"
 #include <sstream>
 #include <stdexcept>
@@ -40,7 +41,27 @@ huffman_tree::huffman_tree(std::map<int8_t, float>& weight_map)
 
 huffman_tree::huffman_tree(std::map<int8_t, bit_string>& encoder_map)
 {
+    root = new huffman_tree_node(0, 0.0f, false);
     
+    for (const auto& p : encoder_map)
+    {
+        const bit_string& code_word = p.second;
+        size_t code_word_length = code_word.length();
+        huffman_tree_node* previous_node = nullptr;
+        huffman_tree_node* current_node = root;
+        
+        for (size_t bit_index = 0; bit_index != code_word_length; ++bit_index)
+        {
+            bool bit = code_word.read_bit(bit_index);
+            
+            if (current_node == nullptr)
+            {
+                huffman_tree_node* new_node = new huffman_tree_node(0, 0.0f, false);
+            }
+            
+            previous_node = current_node;
+        }
+    }
 }
 
 void huffman_tree::recursive_node_delete(huffman_tree::huffman_tree_node* node)

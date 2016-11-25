@@ -10,13 +10,6 @@
 class huffman_serializer {
 public:
     
-    union weight_converter
-    {
-        float weight;
-        int8_t bytes[4];
-    }
-    weight_to_bytes;
-    
     static const int8_t MAGIC[4];
     static const size_t BYTES_PER_WEIGHT_MAP_ENTRY;
     static const size_t BYTES_PER_CODE_WORD_COUNT_ENTRY;

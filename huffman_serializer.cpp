@@ -34,20 +34,32 @@ huffman_serializer::serialize(std::map<int8_t, float>& weight_map,
         byte_list.push_back(magic_byte);
     }
     
-    size_t number_of_code_words = weight_map.size();
-    size_t number_of_text_bits  = encoded_text.length();
+    union
+    {
+        size_t num;
+        int8_t bytes[4];
+    } t;
     
-    // Emit the number of code words.
-    byte_list.push_back((int8_t) (number_of_code_words & 0xff));
-    byte_list.push_back((int8_t)((number_of_code_words >>= 8) & 0xff));
-    byte_list.push_back((int8_t)((number_of_code_words >>= 8) & 0xff));
-    byte_list.push_back((int8_t)((number_of_code_words >>= 8) & 0xff));
+    t.num = weight_map.size();
     
-    // Emit the number of bits in the encoded text.
-    byte_list.push_back((int8_t) (number_of_text_bits & 0xff));
-    byte_list.push_back((int8_t)((number_of_text_bits >>= 8) & 0xff));
-    byte_list.push_back((int8_t)((number_of_text_bits >>= 8) & 0xff));
-    byte_list.push_back((int8_t)((number_of_text_bits >>= 8) & 0xff));
+    byte_list.push_back(t.bytes[0]);
+    byte_list.push_back(t.bytes[1]);
+    byte_list.push_back(t.bytes[2]);
+    byte_list.push_back(t.bytes[3]);
+    
+    t.num = encoded_text.length();
+    
+    byte_list.push_back(t.bytes[0]);
+    byte_list.push_back(t.bytes[1]);
+    byte_list.push_back(t.bytes[2]);
+    byte_list.push_back(t.bytes[3]);
+    
+    union
+    {
+        float weight;
+        int8_t bytes[4];
+    }
+    weight_to_bytes;
     
     // Emit the code words:
     for (const auto& entry : weight_map)

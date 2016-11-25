@@ -114,19 +114,22 @@ extract_weight_map(std::vector<int8_t>& data, size_t number_of_code_words)
             huffman_serializer::BYTES_PER_BIT_COUNT_ENTRY +
             huffman_serializer::BYTES_PER_CODE_WORD_COUNT_ENTRY;
         
+        union
+        {
+            float weight;
+            int8_t bytes[4];
+        } weight_to_bytes;
+        
         for (size_t i = 0; i != number_of_code_words; ++i)
         {
             int8_t byte = data.at(data_byte_index++);
             
-            using wc_type = huffman_serializer::weight_converter;
-            wc_type wc;
+            weight_to_bytes.bytes[0] = data.at(data_byte_index++);
+            weight_to_bytes.bytes[1] = data.at(data_byte_index++);
+            weight_to_bytes.bytes[2] = data.at(data_byte_index++);
+            weight_to_bytes.bytes[3] = data.at(data_byte_index++);
             
-            wc.bytes[0] = data.at(data_byte_index++);
-            wc.bytes[1] = data.at(data_byte_index++);
-            wc.bytes[2] = data.at(data_byte_index++);
-            wc.bytes[3] = data.at(data_byte_index++);
-            
-            weight_map[byte] = wc.weight;
+            weight_map[byte] = weight_to_bytes.weight;
         }
     }
     catch (std::out_of_range& error)

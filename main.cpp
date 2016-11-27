@@ -53,7 +53,16 @@ int main(int argc, const char * argv[])
 //    {
 //        cout << (char) p.first << ": " << p.second << endl;
 //    }
+    
+    std::vector<int8_t> text = {1, 2, 3, 1, 2, 1};
+    
+    std::map<int8_t, uint32_t> cmap = compute_byte_counts(text);
+    huffman_tree tree(cmap);
+    auto encoder_map = tree.infer_encoder_map();
+    huffman_encoder encoder;
+    bit_string b = encoder.encode(encoder_map, text);
     cout << b << endl;
+    
     test_all();
     return 0;
 }

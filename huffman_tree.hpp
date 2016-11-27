@@ -86,7 +86,7 @@ public:
                 return true;
             }
             
-            return lhs->character < rhs->character;
+            return lhs->character > rhs->character;
         }
     };
 };

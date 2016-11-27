@@ -8,9 +8,9 @@
 #include <utility>
 #include <vector>
 
-huffman_tree::huffman_tree(std::map<int8_t, float>& weight_map)
+huffman_tree::huffman_tree(std::map<int8_t, uint32_t>& count_map)
 {
-    if (weight_map.empty())
+    if (count_map.empty())
     {
         std::stringstream ss;
         ss << "Compressor requires a non-empty text.";
@@ -21,9 +21,9 @@ huffman_tree::huffman_tree(std::map<int8_t, float>& weight_map)
                         std::vector<huffman_tree_node*>,
                         huffman_tree::huffman_tree_node_comparator> queue;
     
-    std::for_each(weight_map.cbegin(),
-                  weight_map.cend(),
-                  [&queue](std::pair<int8_t, float> p) {
+    std::for_each(count_map.cbegin(),
+                  count_map.cend(),
+                  [&queue](std::pair<int8_t, uint32_t> p) {
                       queue.push(new huffman_tree_node(p.first,
                                                        p.second,
                                                        true));
@@ -132,14 +132,12 @@ huffman_tree::huffman_tree_node* huffman_tree::merge(huffman_tree_node* node1,
     return new_node;
 }
 
-float huffman_tree::check_weight(float weight)
+uint32_t huffman_tree::check_count(uint32_t count)
 {
-    if (weight <= 0.0f)
+    if (count == 0)
     {
-        std::stringstream ss;
-        ss << "Non-positive weight: " << weight;
-        throw std::runtime_error{ss.str()};
+        throw std::runtime_error{"The input count is zero."};
     }
     
-    return weight;
+    return count;
 }

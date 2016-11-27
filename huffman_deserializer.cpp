@@ -13,13 +13,14 @@ huffman_deserializer::deserialize(std::vector<int8_t> &data)
     // deserialized weight map.
     size_t number_of_code_words = extract_number_of_code_words(data);
     size_t number_of_text_bits  = extract_number_of_encoded_text_bits(data);
-    std::map<int8_t, float> weight_map = extract_weight_map(data,
-                                                            number_of_code_words);
+    std::map<int8_t, uint32_t> count_map =
+                extract_count_map(data, number_of_code_words);
+    
     bit_string encoded_text = extract_encoded_text(data,
-                                                   weight_map,
+                                                   count_map,
                                                    number_of_text_bits);
     result ret;
-    ret.weight_map   = std::move(weight_map);
+    ret.count_map    = std::move(count_map);
     ret.encoded_text = std::move(encoded_text);
     return ret;
 }
@@ -102,10 +103,10 @@ size_t huffman_deserializer
     return t.num;
 }
 
-std::map<int8_t, float> huffman_deserializer::
-extract_weight_map(std::vector<int8_t>& data, size_t number_of_code_words)
+std::map<int8_t, uint32_t> huffman_deserializer::
+extract_count_map(std::vector<int8_t>& data, size_t number_of_code_words)
 {
-    std::map<int8_t, float> weight_map;
+    std::map<int8_t, uint32_t> count_map;
     
     try
     {
@@ -116,20 +117,21 @@ extract_weight_map(std::vector<int8_t>& data, size_t number_of_code_words)
         
         union
         {
-            float weight;
+            uint32_t count;
             int8_t bytes[4];
-        } weight_to_bytes;
+        }
+        count_bytes;
         
         for (size_t i = 0; i != number_of_code_words; ++i)
         {
             int8_t byte = data.at(data_byte_index++);
+            count_bytes.count = 0;
+            count_bytes.bytes[0] = data.at(data_byte_index++);
+            count_bytes.bytes[1] = data.at(data_byte_index++);
+            count_bytes.bytes[2] = data.at(data_byte_index++);
+            count_bytes.bytes[3] = data.at(data_byte_index++);
             
-            weight_to_bytes.bytes[0] = data.at(data_byte_index++);
-            weight_to_bytes.bytes[1] = data.at(data_byte_index++);
-            weight_to_bytes.bytes[2] = data.at(data_byte_index++);
-            weight_to_bytes.bytes[3] = data.at(data_byte_index++);
-            
-            weight_map[byte] = weight_to_bytes.weight;
+            count_map[byte] = count_bytes.count;
         }
     }
     catch (std::out_of_range& error)
@@ -142,12 +144,12 @@ extract_weight_map(std::vector<int8_t>& data, size_t number_of_code_words)
         throw file_format_error{err_msg.c_str()};
     }
     
-    return weight_map;
+    return count_map;
 }
 
 bit_string huffman_deserializer
 ::extract_encoded_text(const std::vector<int8_t>& data,
-                       const std::map<int8_t, float>& weight_map,
+                       const std::map<int8_t, uint32_t>& weight_map,
                        const size_t number_of_encoded_text_bits)
 {
     size_t omitted_bytes =

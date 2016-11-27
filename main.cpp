@@ -316,9 +316,9 @@ std::vector<int8_t> random_text()
 void test_brute_force()
 {
     std::vector<int8_t> text = random_text();
-    std::map<int8_t, float> weight_map = compute_char_weights(text);
+    std::map<int8_t, uint32_t> count_map = compute_byte_counts(text);
     
-    huffman_tree tree(weight_map);
+    huffman_tree tree(count_map);
     
     std::map<int8_t, bit_string> encoder_map = tree.infer_encoder_map();
     
@@ -328,20 +328,20 @@ void test_brute_force()
     
     huffman_serializer serializer;
     
-    std::vector<int8_t> encoded_data = serializer.serialize(weight_map,
+    std::vector<int8_t> encoded_data = serializer.serialize(count_map,
                                                             text_bit_string);
     huffman_deserializer deserializer;
     huffman_deserializer::result hdr = deserializer.deserialize(encoded_data);
     
-    huffman_tree decoder_tree(hdr.weight_map);
+    huffman_tree decoder_tree(hdr.count_map);
     huffman_decoder decoder;
     
-    ASSERT(hdr.weight_map.size() == weight_map.size());
+    ASSERT(hdr.count_map.size() == count_map.size());
     
-    for (auto& e : hdr.weight_map)
+    for (auto& e : hdr.count_map)
     {
-        auto iter = weight_map.find(e.first);
-        ASSERT(iter != weight_map.end());
+        auto iter = count_map.find(e.first);
+        ASSERT(iter != count_map.end());
         ASSERT(e.second == iter->second);
     }
     
@@ -363,9 +363,9 @@ void test_simple_algorithm()
         text_vector.push_back((int8_t) c);
     }
     
-    std::map<int8_t, float> weight_map = compute_char_weights(text_vector);
+    std::map<int8_t, uint32_t> count_map = compute_byte_counts(text_vector);
     
-    huffman_tree tree(weight_map);
+    huffman_tree tree(count_map);
     
     std::map<int8_t, bit_string> encoder_map = tree.infer_encoder_map();
     
@@ -375,14 +375,14 @@ void test_simple_algorithm()
     
     huffman_serializer serializer;
     
-    std::vector<int8_t> encoded_text = serializer.serialize(weight_map,
+    std::vector<int8_t> encoded_text = serializer.serialize(count_map,
                                                             text_bit_string);
     
     huffman_deserializer deserializer;
     
     huffman_deserializer::result hdr = deserializer.deserialize(encoded_text);
     
-    huffman_tree decoder_tree(hdr.weight_map);
+    huffman_tree decoder_tree(hdr.count_map);
     huffman_decoder decoder;
     
     std::vector<int8_t> recovered_text = decoder.decode(decoder_tree,

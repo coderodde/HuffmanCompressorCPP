@@ -15,7 +15,7 @@ public:
     static const size_t BYTES_PER_CODE_WORD_COUNT_ENTRY;
     static const size_t BYTES_PER_BIT_COUNT_ENTRY;
     
-    std::vector<int8_t> serialize(std::map<int8_t, float>& weight_map,
+    std::vector<int8_t> serialize(std::map<int8_t, uint32_t>& count_map,
                                   bit_string& encoded_text);
 };
 

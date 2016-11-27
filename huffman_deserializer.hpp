@@ -11,7 +11,7 @@ public:
     
     struct result {
         bit_string encoded_text;
-        std::map<int8_t, float> weight_map;
+        std::map<int8_t, uint32_t> count_map;
     };
     
     /********************************************************************
@@ -34,13 +34,14 @@ private:
     size_t extract_number_of_encoded_text_bits(std::vector<int8_t>& data);
     
     // Extracts the actual encoder map from the stream:
-    std::map<int8_t, float>
-    extract_weight_map(std::vector<int8_t>& data, size_t number_of_code_words);
+    std::map<int8_t, uint32_t>
+    extract_count_map(std::vector<int8_t>& data, size_t number_of_code_words);
     
     // Extracts the actual encoded text from the stream:
-    bit_string extract_encoded_text(const std::vector<int8_t>& data,
-                                    const std::map<int8_t, float>& weight_map,
-                                    const size_t number_of_encoded_text_bits);
+    bit_string extract_encoded_text(
+                                const std::vector<int8_t>& data,
+                                const std::map<int8_t, uint32_t>& weight_map,
+                                const size_t number_of_encoded_text_bits);
 };
 
 #endif // HUFFMAN_DESERIALIZER_HPP

@@ -8,10 +8,10 @@
 class huffman_tree
 {
 public:
-    /*******************************************************
-    * Build this Huffman tree using the character weights. *
-    *******************************************************/
-    explicit huffman_tree(std::map<int8_t, float>& weight_map);
+    /******************************************************
+    * Build this Huffman tree using the character counts. *
+    ******************************************************/
+    explicit huffman_tree(std::map<int8_t, uint32_t>& count_map);
     
     ~huffman_tree();
     
@@ -67,8 +67,8 @@ private:
                                 huffman_tree_node* current_node,
                                 std::map<int8_t, bit_string>& map);
     
-    // Checks that the input weight is positive:
-    float check_weight(float weight);
+    // Checks that the input count is positive:
+    uint32_t check_count(uint32_t count);
     
     // Used for deallocating the memory occupied by the tree nodes:
     void recursive_node_delete(huffman_tree_node* node);

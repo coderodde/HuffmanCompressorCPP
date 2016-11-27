@@ -20,11 +20,18 @@ using std::endl;
 using std::equal;
 using std::runtime_error;
 
-#define ASSERT(C) if (!(C)) report(__FILE__, __LINE__)
+#define ASSERT(C) if (!(C)) report(#C, __FILE__, __LINE__)
 
-void report(const char* file, size_t line)
+void report(const char* condition, const char* file, size_t line)
 {
-    cerr << "File: " << file << ", line: " << line << endl;
+    cerr << "The condition \""
+         << condition
+         << "\" failed in file \""
+         << file
+         << "\", line: "
+         << line
+         << "."
+         << endl;
     exit(1);
 }
 

@@ -53,7 +53,7 @@ int main(int argc, const char * argv[])
 //    {
 //        cout << (char) p.first << ": " << p.second << endl;
 //    }
-    
+    cout << b << endl;
     test_all();
     return 0;
 }

@@ -81,7 +81,12 @@ public:
         bool operator()(const huffman_tree_node *const lhs,
                         const huffman_tree_node *const rhs)
         {
-            return lhs->weight > rhs->weight;
+            if (lhs->weight > rhs->weight)
+            {
+                return true;
+            }
+            
+            return lhs->character > rhs->character;
         }
     };
 };

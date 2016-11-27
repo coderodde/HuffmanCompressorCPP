@@ -63,6 +63,10 @@ std::map<int8_t, bit_string> huffman_tree::infer_encoder_map()
     
     if (root->is_leaf)
     {
+        root->is_leaf = false;
+        root->left = new huffman_tree_node(root->character,
+                                           1,
+                                           true);
         bit_string b;
         b.append_bit(false);
         map[root->character] = std::move(b);
@@ -76,6 +80,12 @@ std::map<int8_t, bit_string> huffman_tree::infer_encoder_map()
 
 int8_t huffman_tree::decode_bit_string(size_t& index, bit_string& bits)
 {
+    if (root->is_leaf)
+    {
+        index++;
+        return root->character;
+    }
+    
     huffman_tree_node* current_node = root;
     
     while (!current_node->is_leaf)

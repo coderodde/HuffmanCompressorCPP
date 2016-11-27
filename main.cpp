@@ -391,9 +391,36 @@ void test_simple_algorithm()
     ASSERT(std::equal(text.begin(), text.end(), recovered_text.begin()));
 }
 
+void test_one_byte_text()
+{
+    std::vector<int8_t> text = { 0x01, 0x01 };
+    std::map<int8_t, uint32_t> count_map = compute_byte_counts(text);
+    huffman_tree tree(count_map);
+    std::map<int8_t, bit_string> encoder_map = tree.infer_encoder_map();
+    huffman_encoder encoder;
+    bit_string text_bit_string = encoder.encode(encoder_map, text);
+    huffman_serializer serializer;
+    std::vector<int8_t> serialized_text = serializer.serialize(count_map,
+                                                               text_bit_string);
+    huffman_deserializer deserializer;
+    huffman_deserializer::result hdr =
+        deserializer.deserialize(serialized_text);
+    
+    huffman_tree decoder_tree(hdr.count_map);
+    
+    huffman_decoder decoder;
+    
+    std::vector<int8_t> recovered_text = decoder.decode(decoder_tree,
+                                                        hdr.encoded_text);
+    ASSERT(recovered_text.size() == 2);
+    ASSERT(recovered_text[0] = 0x1);
+    ASSERT(recovered_text[1] = 0x1);
+}
+
 void test_algorithms()
 {
     test_simple_algorithm();
+    test_one_byte_text();
     
     for (int iter = 0; iter != 100; ++iter)
     {

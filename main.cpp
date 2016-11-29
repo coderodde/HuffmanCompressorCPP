@@ -7,12 +7,14 @@
 #include "huffman_tree.hpp"
 
 #include <algorithm>
+#include <cstdint>
 #include <iostream>
 #include <limits>
 #include <map>
 #include <random>
+#include <set>
 #include <stdexcept>
-#include <cstdint>
+#include <string>
 
 using std::cout;
 using std::cerr;
@@ -35,43 +37,154 @@ void report(const char* condition, const char* file, size_t line)
     exit(1);
 }
 
+static std::string ENCODE_FLAG_SHORT  = "-e";
+static std::string ENCODE_FLAG_LONG   = "--encode";
+static std::string DECODE_FLAG_SHORT  = "-d";
+static std::string DECODE_FLAG_LONG   = "--decode";
+static std::string HELP_FLAG_SHORT    = "-h";
+static std::string HELP_FLAG_LONG     = "--help";
+static std::string VERSION_FLAG_SHORT = "-v";
+static std::string VERSION_FLAG_LONG  = "--version";
+static std::string ENCODED_FILE_EXTENSION = "het";
+
 void test_append_bit();
 void test_bit_string();
 void test_all();
 
+void exec(int argc, const char *argv[]);
+void print_help_message(const char *arg1);
+void print_version();
+
 int main(int argc, const char * argv[])
 {
-//    std::vector<int8_t> text = {(int8_t) 'h', (int8_t) 'w', (int8_t) 0xb9 };
-//    //{'h', 'e', 'l', 'l', 'o', ' ', 'w', 'o', 'r', 'l', 'd'};
-//    
-//    std::map<int8_t, float> weight_map = compute_char_weights(text);
-//    
-//    for (auto& p : weight_map)
-//    {
-//        cout << p.first << " " << p.second << endl;
-//    }
-//    
-//    exit(0);
-//    
-//    huffman_tree tree(weight_map);
-//    std::map<int8_t, bit_string> encoder_map = tree.infer_encoder_map();
-//    
-//    for (auto p : encoder_map)
-//    {
-//        cout << (char) p.first << ": " << p.second << endl;
-//    }
-    
-    std::vector<int8_t> text = {1, 2, 3, 1, 2, 1};
-    
-    std::map<int8_t, uint32_t> cmap = compute_byte_counts(text);
-    huffman_tree tree(cmap);
-    auto encoder_map = tree.infer_encoder_map();
-    huffman_encoder encoder;
-    bit_string b = encoder.encode(encoder_map, text);
-    cout << b << endl;
-    
+    print_help_message(argv[0]);
+#ifdef NDEBUG
+    exec(argc, argv);
+#else
     test_all();
+#endif
     return 0;
+}
+
+void exec(int argc, const char *argv[])
+{
+    std::set<std::string> command_line_argument_set;
+    std::for_each(argv + 1,
+                  argv + argc,
+                  [&command_line_argument_set](const char *s) {
+                      command_line_argument_set.insert(std::string{s});});
+    
+    if (command_line_argument_set.find(HELP_FLAG_SHORT)
+        != command_line_argument_set.end()
+        || command_line_argument_set.find(HELP_FLAG_LONG)
+        != command_line_argument_set.end())
+    {
+        print_help_message(argv[0]);
+        exit(0);
+    }
+    
+    if (command_line_argument_set.find(VERSION_FLAG_SHORT)
+        != command_line_argument_set.end()
+        || command_line_argument_set.find(VERSION_FLAG_LONG)
+        != command_line_argument_set.end())
+    {
+        print_version();
+        exit(0);
+    }
+    
+    if (command_line_argument_set.find(DECODE_FLAG_LONG)
+        != command_line_argument_set.end()
+        &&
+        command_line_argument_set.find(DECODE_FLAG_SHORT)
+        != command_line_argument_set.end())
+    {
+        print_help_message(argv[0]);
+        exit(1);
+    }
+}
+
+static std::string get_base_name(const char *cmd_line)
+{
+    std::string tmp = cmd_line;
+ 
+    if (tmp.empty())
+    {
+        throw std::runtime_error{"Empty base name string."};
+    }
+    
+    char file_separator;
+    
+#ifdef _WIN32
+    file_separator = '\\';
+#else
+    file_separator = '/';
+#endif
+    
+    int index = tmp.length() - 1;
+    
+    for (; index >= 0; --index)
+    {
+        if (tmp[index] == file_separator)
+        {
+            std::string ret;
+            
+            while (++index < tmp.length())
+            {
+                ret += tmp[index];
+            }
+            
+            return ret;
+        }
+    }
+    
+    return tmp;
+}
+
+std::string get_indent(size_t len)
+{
+    std::string ret;
+    
+    for (size_t i = 0; i != len; ++i)
+    {
+        ret += ' ';
+    }
+    
+    return ret;
+}
+
+void print_help_message(const char *arg1)
+{
+    std::string preamble = "usage: " + get_base_name(arg1) + " ";
+    size_t preamble_length = preamble.length();
+    std::string indent = get_indent(preamble_length);
+    cout << preamble;
+    
+    cout << "[" << HELP_FLAG_SHORT << " | " << HELP_FLAG_LONG << "]\n";
+    cout << indent
+         << "[" << VERSION_FLAG_SHORT << " | " << VERSION_FLAG_LONG << "]\n";
+    cout << indent
+         << "[" << ENCODE_FLAG_SHORT << " | " << ENCODE_FLAG_LONG
+         << "] FILE\n";
+    cout << indent
+         << "[" << DECODE_FLAG_SHORT << " | " << DECODE_FLAG_LONG
+         << "] FILE_FROM FILE_TO\n";
+    
+    cout << "Where:" << endl;
+    
+    cout << HELP_FLAG_SHORT << ", " << HELP_FLAG_LONG
+         << "    Print this message and exit.\n";
+    cout << VERSION_FLAG_SHORT << ", " << VERSION_FLAG_LONG
+         << " Print the version info and exit.\n";
+    cout << ENCODE_FLAG_SHORT << ", " << ENCODE_FLAG_LONG
+         << "  Encode the text from file.\n";
+    cout << DECODE_FLAG_SHORT << ", " << DECODE_FLAG_LONG
+         << "  Decode the text from file.\n";
+}
+
+void print_version()
+{
+    cout << "Huffman compressor C++ tool, version 1.6 (Nov 29, 2016)" << endl;
+    cout << "By Rodion \"rodde\" Efremov" << endl;
 }
 
 void test_append_bit()

@@ -52,18 +52,43 @@ void test_bit_string();
 void test_all();
 
 void exec(int argc, const char *argv[]);
-void print_help_message(const char *arg1);
+void print_help_message(std::string& image_name);
 void print_version();
+std::string get_base_name(const char *arg1);
 
 int main(int argc, const char * argv[])
 {
-    print_help_message(argv[0]);
-#ifdef NDEBUG
     exec(argc, argv);
-#else
     test_all();
-#endif
     return 0;
+}
+
+void do_decode(int argc, const char * argv[])
+{
+    std::string decoded_file_name;
+    
+    for (int i = argc - 1; i > 0; --i)
+    {
+        std::string tmp = argv[i];
+        
+        if (tmp != DECODE_FLAG_LONG and tmp != DECODE_FLAG_SHORT)
+        {
+            decoded_file_name = tmp;
+        }
+    }
+    
+    if (decoded_file_name == "")
+    {
+        throw std::runtime_error{"No file name found."};
+    }
+    
+    
+    
+}
+
+void do_encode(int argc, const char * argv[])
+{
+    
 }
 
 void exec(int argc, const char *argv[])
@@ -74,36 +99,69 @@ void exec(int argc, const char *argv[])
                   [&command_line_argument_set](const char *s) {
                       command_line_argument_set.insert(std::string{s});});
     
-    if (command_line_argument_set.find(HELP_FLAG_SHORT)
-        != command_line_argument_set.end()
-        || command_line_argument_set.find(HELP_FLAG_LONG)
-        != command_line_argument_set.end())
+    std::string image_name = get_base_name(argv[0]);
+    auto args_end = command_line_argument_set.end();
+    
+    if (command_line_argument_set.find(HELP_FLAG_SHORT) != args_end ||
+        command_line_argument_set.find(HELP_FLAG_LONG)  != args_end)
     {
-        print_help_message(argv[0]);
+        print_help_message(image_name);
         exit(0);
     }
     
-    if (command_line_argument_set.find(VERSION_FLAG_SHORT)
-        != command_line_argument_set.end()
-        || command_line_argument_set.find(VERSION_FLAG_LONG)
-        != command_line_argument_set.end())
+    if (command_line_argument_set.find(VERSION_FLAG_SHORT) != args_end ||
+        command_line_argument_set.find(VERSION_FLAG_LONG)  != args_end)
     {
         print_version();
         exit(0);
     }
     
-    if (command_line_argument_set.find(DECODE_FLAG_LONG)
-        != command_line_argument_set.end()
-        &&
-        command_line_argument_set.find(DECODE_FLAG_SHORT)
-        != command_line_argument_set.end())
+    if (command_line_argument_set.find(DECODE_FLAG_SHORT) != args_end &&
+        command_line_argument_set.find(DECODE_FLAG_LONG)  != args_end)
     {
-        print_help_message(argv[0]);
+        print_help_message(image_name);
         exit(1);
+    }
+    
+    if (command_line_argument_set.find(ENCODE_FLAG_SHORT) != args_end &&
+        command_line_argument_set.find(ENCODE_FLAG_LONG)  != args_end)
+    {
+        print_help_message(image_name);
+        exit(0);
+    }
+    
+    bool decode = false;
+    bool encode = false;
+    
+    if (command_line_argument_set.find(DECODE_FLAG_SHORT) != args_end ||
+        command_line_argument_set.find(DECODE_FLAG_LONG)  != args_end)
+    {
+        decode = true;
+    }
+    
+    if (command_line_argument_set.find(ENCODE_FLAG_SHORT) != args_end ||
+        command_line_argument_set.find(ENCODE_FLAG_LONG)  != args_end)
+    {
+        encode = true;
+    }
+    
+    if ((!decode and !encode) or (decode and encode))
+    {
+        print_help_message(image_name);
+        exit(0);
+    }
+    
+    if (decode)
+    {
+        do_decode(argc, argv);
+    }
+    else
+    {
+        do_encode(argc, argv);
     }
 }
 
-static std::string get_base_name(const char *cmd_line)
+std::string get_base_name(const char *cmd_line)
 {
     std::string tmp = cmd_line;
  
@@ -120,7 +178,7 @@ static std::string get_base_name(const char *cmd_line)
     file_separator = '/';
 #endif
     
-    int index = tmp.length() - 1;
+    int index = (int) tmp.length() - 1;
     
     for (; index >= 0; --index)
     {
@@ -152,9 +210,9 @@ std::string get_indent(size_t len)
     return ret;
 }
 
-void print_help_message(const char *arg1)
+void print_help_message(std::string& process_image_name)
 {
-    std::string preamble = "usage: " + get_base_name(arg1) + " ";
+    std::string preamble = "usage: " + process_image_name + " ";
     size_t preamble_length = preamble.length();
     std::string indent = get_indent(preamble_length);
     cout << preamble;

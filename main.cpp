@@ -47,6 +47,8 @@ static std::string VERSION_FLAG_SHORT = "-v";
 static std::string VERSION_FLAG_LONG  = "--version";
 static std::string ENCODED_FILE_EXTENSION = "het";
 
+static std::string BAD_CMD_FORMAT = "Bad command line format.";
+
 void test_append_bit();
 void test_bit_string();
 void test_all();
@@ -65,30 +67,40 @@ int main(int argc, const char * argv[])
 
 void do_decode(int argc, const char * argv[])
 {
-    std::string decoded_file_name;
-    
-    for (int i = argc - 1; i > 0; --i)
+    if (argc != 4)
     {
-        std::string tmp = argv[i];
-        
-        if (tmp != DECODE_FLAG_LONG and tmp != DECODE_FLAG_SHORT)
-        {
-            decoded_file_name = tmp;
-        }
+        throw std::runtime_error{BAD_CMD_FORMAT};
     }
     
-    if (decoded_file_name == "")
+    std::string flag = argv[1];
+    
+    if (flag != DECODE_FLAG_SHORT and flag != DECODE_FLAG_LONG)
     {
-        throw std::runtime_error{"No file name found."};
+        throw std::runtime_error{BAD_CMD_FORMAT};
     }
     
+    std::string source_file = argv[2];
+    std::string target_file = argv[3];
     
-    
+    cout << "Decoding from " << source_file << " to " << target_file << endl;
 }
 
 void do_encode(int argc, const char * argv[])
 {
+    if (argc != 3)
+    {
+        throw std::runtime_error{BAD_CMD_FORMAT};
+    }
     
+    std::string flag = argv[1];
+    
+    if (flag != ENCODE_FLAG_SHORT and flag != ENCODE_FLAG_LONG)
+    {
+        throw std::runtime_error{BAD_CMD_FORMAT};
+    }
+    
+    std::string source_file = argv[2];
+    cout << "Encoding " << source_file << endl;
 }
 
 void exec(int argc, const char *argv[])

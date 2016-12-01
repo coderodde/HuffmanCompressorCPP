@@ -8,7 +8,9 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <fstream>
 #include <iostream>
+#include <iterator>
 #include <limits>
 #include <map>
 #include <random>
@@ -19,8 +21,6 @@
 using std::cout;
 using std::cerr;
 using std::endl;
-using std::equal;
-using std::runtime_error;
 
 #define ASSERT(C) if (!(C)) report(#C, __FILE__, __LINE__)
 
@@ -58,11 +58,36 @@ void print_help_message(std::string& image_name);
 void print_version();
 std::string get_base_name(const char *arg1);
 
+void file_write(std::string& file_name, std::vector<int8_t>& data);
+std::vector<int8_t> file_read(std::string& file_name);
+
 int main(int argc, const char * argv[])
 {
     exec(argc, argv);
-    test_all();
+    //test_all();
     return 0;
+}
+
+void file_write(std::string& file_name, std::vector<int8_t>& data)
+{
+    std::ofstream file(file_name, std::ios::out | std::ofstream::binary);
+    std::copy(data.begin(), data.end(), std::ostreambuf_iterator<char>(file));
+    file.close();
+}
+
+std::vector<int8_t> file_read(std::string& file_name)
+{
+    std::ifstream file(file_name, std::ios::in | std::ifstream::binary);
+    std::vector<int8_t> ret;
+    int8_t i;
+    
+    while (file >> i)
+    {
+        ret.push_back(i);
+    }
+    
+    file.close();
+    return std::move(ret);
 }
 
 void do_decode(int argc, const char * argv[])
@@ -82,7 +107,16 @@ void do_decode(int argc, const char * argv[])
     std::string source_file = argv[2];
     std::string target_file = argv[3];
     
-    cout << "Decoding from " << source_file << " to " << target_file << endl;
+    std::vector<int8_t> encoded_data = file_read(source_file);
+    huffman_deserializer deserializer;
+    huffman_deserializer::result decode_result =
+        deserializer.deserialize(encoded_data);
+    
+    huffman_tree decoder_tree(decode_result.count_map);
+    huffman_decoder decoder;
+    std::vector<int8_t> text = decoder.decode(decoder_tree,
+                                              decode_result.encoded_text);
+    file_write(target_file, text);
 }
 
 void do_encode(int argc, const char * argv[])
@@ -100,7 +134,21 @@ void do_encode(int argc, const char * argv[])
     }
     
     std::string source_file = argv[2];
-    cout << "Encoding " << source_file << endl;
+    std::vector<int8_t> text = file_read(source_file);
+    
+    std::map<int8_t, uint32_t> count_map = compute_byte_counts(text);
+    huffman_tree tree(count_map);
+    std::map<int8_t, bit_string> encoder_map = tree.infer_encoder_map();
+    huffman_encoder encoder;
+    bit_string encoded_text = encoder.encode(encoder_map, text);
+    huffman_serializer serializer;
+    std::vector<int8_t> encoded_data = serializer.serialize(count_map,
+                                                            encoded_text);
+    std::string out_file_name = source_file;
+    out_file_name += ".";
+    out_file_name += ENCODED_FILE_EXTENSION;
+    
+    file_write(out_file_name, encoded_data);
 }
 
 void exec(int argc, const char *argv[])
@@ -350,7 +398,7 @@ void test_read_bit_bad_index_throws()
     {
         b.read_bit(1); ASSERT(false);
     }
-    catch (runtime_error& err)
+    catch (std::runtime_error& err)
     {
         
     }
@@ -359,7 +407,7 @@ void test_read_bit_bad_index_throws()
     {
         b.read_bit(-1); ASSERT(false);
     }
-    catch (runtime_error& err)
+    catch (std::runtime_error& err)
     {
         
     }

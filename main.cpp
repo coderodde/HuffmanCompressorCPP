@@ -71,7 +71,10 @@ int main(int argc, const char * argv[])
 void file_write(std::string& file_name, std::vector<int8_t>& data)
 {
     std::ofstream file(file_name, std::ios::out | std::ofstream::binary);
-    std::copy(data.begin(), data.end(), std::ostreambuf_iterator<char>(file));
+    std::size_t size = data.size();
+    char* byte_data = new char[size];
+    std::copy(data.begin(), data.end(), byte_data);
+    file.write(byte_data, size);
     file.close();
 }
 
@@ -79,13 +82,19 @@ std::vector<int8_t> file_read(std::string& file_name)
 {
     std::ifstream file(file_name, std::ios::in | std::ifstream::binary);
     std::vector<int8_t> ret;
-    int8_t i;
+    std::filebuf* pbuf = file.rdbuf();
+    std::size_t size = pbuf->pubseekoff(0, file.end, file.in);
     
-    while (file >> i)
+    pbuf->pubseekpos(0, file.in);
+    char* buffer = new char[size];
+    pbuf->sgetn(buffer, size);
+    
+    for (std::size_t i = 0; i != size; ++i)
     {
-        ret.push_back(i);
+        ret.push_back((int8_t) buffer[i]);
     }
     
+    delete[] buffer;
     file.close();
     return std::move(ret);
 }
@@ -135,6 +144,8 @@ void do_encode(int argc, const char * argv[])
     
     std::string source_file = argv[2];
     std::vector<int8_t> text = file_read(source_file);
+    
+    std::cout << "File size " << text.size() << std::endl;
     
     std::map<int8_t, uint32_t> count_map = compute_byte_counts(text);
     huffman_tree tree(count_map);

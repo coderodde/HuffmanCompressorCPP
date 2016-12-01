@@ -139,6 +139,7 @@ huffman_tree::huffman_tree_node* huffman_tree::merge(huffman_tree_node* node1,
         new_node->right = node1;
     }
     
+    new_node->character = std::max(node1->character, node2->character);
     return new_node;
 }
 

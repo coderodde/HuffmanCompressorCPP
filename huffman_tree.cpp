@@ -125,10 +125,10 @@ huffman_tree::huffman_tree_node* huffman_tree::merge(huffman_tree_node* node1,
                                                      huffman_tree_node* node2)
 {
     huffman_tree_node* new_node = new huffman_tree_node(0,
-                                                        node1->weight +
-                                                        node2->weight,
+                                                        node1->count +
+                                                        node2->count,
                                                         false);
-    if (node1->weight < node2->weight)
+    if (node1->count < node2->count)
     {
         new_node->left  = node1;
         new_node->right = node2;

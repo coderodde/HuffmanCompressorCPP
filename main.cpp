@@ -1,5 +1,5 @@
 #include "bit_string.hpp"
-#include "byte_weights.hpp"
+#include "byte_counts.hpp"
 #include "huffman_decoder.hpp"
 #include "huffman_deserializer.hpp"
 #include "huffman_encoder.hpp"
@@ -63,24 +63,6 @@ std::vector<int8_t> file_read(std::string& file_name);
 
 int main(int argc, const char * argv[])
 {
-    std::vector<int8_t> text;
-    std::string intext = "hello world";
-    for (size_t i = 0; i != intext.length(); ++i)
-    {
-        text.push_back((int8_t) intext[i]);
-    }
-    
-    std::map<int8_t, uint32_t> count_map = compute_byte_counts(text);
-    huffman_tree tree(count_map);
-    std::map<int8_t, bit_string> encoder_map = tree.infer_encoder_map();
-    
-    for (auto& p : encoder_map)
-    {
-        std::cout << p.first << ": " << p.second << std::endl;
-    }
-    
-    exit(0);
-    
     exec(argc, argv);
     //test_all();
     return 0;
@@ -162,20 +144,14 @@ void do_encode(int argc, const char * argv[])
     
     std::string source_file = argv[2];
     std::vector<int8_t> text = file_read(source_file);
-    
-    std::cout << "File size " << text.size() << std::endl;
-    
     std::map<int8_t, uint32_t> count_map = compute_byte_counts(text);
+    
     huffman_tree tree(count_map);
     std::map<int8_t, bit_string> encoder_map = tree.infer_encoder_map();
     
-    for (auto& p : encoder_map)
-    {
-        std::cout << p.first << ": " << p.second << std::endl;
-    }
-    
     huffman_encoder encoder;
     bit_string encoded_text = encoder.encode(encoder_map, text);
+    
     huffman_serializer serializer;
     std::vector<int8_t> encoded_data = serializer.serialize(count_map,
                                                             encoded_text);

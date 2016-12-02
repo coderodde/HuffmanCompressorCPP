@@ -149,7 +149,7 @@ extract_count_map(std::vector<int8_t>& data, size_t number_of_code_words)
 
 bit_string huffman_deserializer
 ::extract_encoded_text(const std::vector<int8_t>& data,
-                       const std::map<int8_t, uint32_t>& weight_map,
+                       const std::map<int8_t, uint32_t>& count_map,
                        const size_t number_of_encoded_text_bits)
 {
     size_t omitted_bytes =
@@ -158,7 +158,7 @@ bit_string huffman_deserializer
         huffman_serializer::BYTES_PER_CODE_WORD_COUNT_ENTRY;
     
     omitted_bytes +=
-        weight_map.size() * huffman_serializer::BYTES_PER_WEIGHT_MAP_ENTRY;
+        count_map.size() * huffman_serializer::BYTES_PER_WEIGHT_MAP_ENTRY;
     
     bit_string encoded_text;
     size_t current_byte_index = omitted_bytes;

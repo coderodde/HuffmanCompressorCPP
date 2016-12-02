@@ -34,8 +34,8 @@ private:
     {
         int8_t             character; // The character of this node. Ignore if
                                       // not a leaf node.
-        float              weight;    // If a leaf, the weight of the character.
-                                      // Otherwise, the sum of weights of its
+        uint32_t           count;     // If a leaf, the count of the character.
+                                      // Otherwise, the sum of counts of its
                                       // left and right child nodes.
         bool               is_leaf;   // This node is leaf?
         huffman_tree_node* left;      // The left child node.
@@ -43,11 +43,11 @@ private:
         
         // Construct a new Huffman tree node.
         huffman_tree_node(int8_t character,
-                          float weight,
+                          uint32_t count,
                           bool is_leaf)
         :
         character   {character},
-        weight      {weight},
+        count       {count},
         is_leaf     {is_leaf},
         left        {nullptr},
         right       {nullptr}
@@ -81,14 +81,14 @@ public:
         bool operator()(const huffman_tree_node *const lhs,
                         const huffman_tree_node *const rhs)
         {
-            if (lhs->weight == rhs->weight)
+            if (lhs->count == rhs->count)
             {
                 // If same weights, order by char value:
                 return lhs->character > rhs->character;
             }
             
             // Otherwise, compare by weights:
-            return lhs->weight > rhs->weight;
+            return lhs->count > rhs->count;
         }
     };
 };

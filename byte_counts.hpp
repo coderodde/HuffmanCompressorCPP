@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef BYTE_WEIGHTS_HPP
-#define BYTE_WEIGHTS_HPP
+#ifndef BYTE_COUNTS_HPP
+#define BYTE_COUNTS_HPP
 
 #include "huffman_tree.hpp"
 #include <cstdint>
